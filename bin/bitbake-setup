@@ -106,9 +106,9 @@ def setup_build(config, layerdir, builddir):
     build_script = os.path.join(builddir, "build.sh")
     init_script = os.path.join(builddir, "init-build-env")
     targets = " && ".join(config["targets"])
-    shell = os.environ["SHELL"]
+    shell = os.path.basename(os.environ.get("SHELL","bash"))
     with open(build_script,'w') as f:
-        f.write("#!{}\n. {} && {}\n".format(shell, init_script, targets))
+        f.write("#!/usr/bin/env {}\n. {} && {}\n".format(shell, init_script, targets))
     st = os.stat(build_script)
     os.chmod(build_script, st.st_mode | stat.S_IEXEC)
     print("\nRun {} to build using this configuration.".format(build_script))
