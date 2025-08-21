@@ -539,7 +539,7 @@ def install_buildtools(settings, args, d):
             print("Buildtools are already installed in {}.".format(buildtools_install_dir))
             env_scripts = glob.glob(os.path.join(buildtools_install_dir, 'environment-setup-*'))
             if env_scripts:
-                print("If you wish to use them, you need to source the the environment setup script e.g.")
+                print("If you wish to use them, you need to source the environment setup script e.g.")
                 for s in env_scripts:
                     print("$ . {}".format(s))
             print("You can also re-run bitbake-setup install-buildtools with --force option to force a reinstallation.")
