@@ -392,6 +392,9 @@ def init_config(settings, args, d):
     os.makedirs(layerdir)
 
     bb.process.run("git -C {} init -b main".format(confdir))
+    # Make sure commiting doesn't fail if no default git user is configured on the machine
+    bb.process.run("git -C {} config user.name bitbake-setup".format(confdir))
+    bb.process.run("git -C {} config user.email bitbake-setup@not.set".format(confdir))
     bb.process.run("git -C {} commit --allow-empty -m 'Initial commit'".format(confdir))
 
     bb.event.register("bb.build.TaskProgress", handle_task_progress, data=d)
