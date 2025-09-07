@@ -330,7 +330,11 @@ def obtain_config(settings, args, source_overrides, d):
         config_parameters = args.config[1:]
         if os.path.exists(config_id):
             print("Reading configuration from local file\n    {}".format(config_id))
-            upstream_config = {'type':'local','path':os.path.abspath(args.config),'name':get_config_name(config_id),'data':json.load(open(config_path))}
+            upstream_config = {'type':'local',
+                               'path':os.path.abspath(config_id),
+                               'name':get_config_name(config_id),
+                               'data':json.load(open(config_id))
+                               }
         elif config_id.startswith("http://") or config_id.startswith("https://"):
             print("Reading configuration from network URI\n    {}".format(config_id))
             import urllib.request
