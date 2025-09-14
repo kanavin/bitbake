@@ -741,10 +741,12 @@ def main():
     parser_init.set_defaults(func=init_config)
 
     parser_status = subparsers.add_parser('status', help='Check if the build needs to be synchronized with configuration')
+    add_top_dir_arg(parser_status)
     add_build_dir_arg(parser_status)
     parser_status.set_defaults(func=build_status)
 
     parser_update = subparsers.add_parser('update', help='Update a build to be in sync with configuration')
+    add_top_dir_arg(parser_update)
     add_build_dir_arg(parser_update)
     parser_update.set_defaults(func=build_update)
 
