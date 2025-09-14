@@ -143,9 +143,23 @@ def setup_bitbake_build(bitbake_config, layerdir, builddir):
             f.write("")
 
     def _make_init_build_env(builddir, initbuildenv):
+        exports = []
+        env = bitbake_config.get("build-environment")
+        if env:
+            for key, value in env.items():
+                if isinstance(value, list):
+                    joined = " \\\n".join(value)
+                    value = joined
+                value = value.replace("##BUILDDIR##", builddir)
+                exports.append(f'export {key}="{value}"')
+
         cmd = ". {} {}".format(initbuildenv, builddir)
         initbuild_in_builddir = os.path.join(builddir, 'init-build-env')
+
         with open(initbuild_in_builddir, 'w') as f:
+            f.write("# init-build-env wrapper created by bitbake-setup\n")
+            for e in exports:
+                f.write(e + '\n')
             f.write(cmd)
 
     bitbake_builddir = os.path.join(builddir, "build")
