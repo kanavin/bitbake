@@ -50,7 +50,13 @@ def save_bb_cache():
     bb.fetch2.fetcher_parse_done()
 
 def get_config_name(config):
-    return os.path.basename(config).split('.')[0]
+    from pathlib import Path
+
+    known_suffixes = ['.json', '.conf', '.override']
+    path = Path(config)
+    while path.suffix in known_suffixes:
+        path = path.with_suffix('')
+    return path.name
 
 def write_config(config, config_dir):
     with open(os.path.join(config_dir, "config-upstream.json"),'w') as s:
