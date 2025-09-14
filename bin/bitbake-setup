@@ -109,7 +109,7 @@ def setup_bitbake_build(bitbake_config, layerdir, builddir):
     def _setup_build_conf(layers, build_conf_dir):
         os.makedirs(build_conf_dir)
         layers_s = "\n".join(["  {} \\".format(os.path.join(layerdir,l)) for l in layers])
-        bblayers_conf = """BBLAYERS ?= " \
+        bblayers_conf = """BBLAYERS ?= " \\
 {}
   "
 """.format(layers_s)
