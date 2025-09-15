@@ -179,7 +179,7 @@ def setup_bitbake_build(bitbake_config, layerdir, builddir):
     if os.path.exists(bitbake_confdir):
         os.rename(bitbake_confdir, backup_bitbake_confdir)
 
-    if layers:
+    if layers and not template:
         _setup_build_conf(layers, bitbake_confdir)
 
     if template:
