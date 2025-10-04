@@ -611,48 +611,47 @@ def install_buildtools(settings, args, d):
 def default_settings_path(top_dir):
     return os.path.join(top_dir, 'bitbake-setup.conf')
 
-def write_settings(top_dir, force_replace, non_interactive=True):
+def create_settings(top_dir, non_interactive=True):
     settings_path = default_settings_path(top_dir)
-    if not os.path.exists(settings_path) or force_replace:
 
-        settings = configparser.ConfigParser()
-        settings['default'] = {
-                             'registry':default_registry,
-                             'dl-dir':os.path.join(top_dir, '.bitbake-setup-downloads'),
-                            }
-        os.makedirs(os.path.dirname(settings_path), exist_ok=True)
+    settings = configparser.ConfigParser()
+    settings['default'] = {
+                         'registry':default_registry,
+                         'dl-dir':os.path.join(top_dir, '.bitbake-setup-downloads'),
+                        }
+    os.makedirs(os.path.dirname(settings_path), exist_ok=True)
 
-        siteconfpath = os.path.join(top_dir, 'site.conf')
-        print('Configuration registry set to\n    {}\n'.format(settings['default']['registry']))
-        print('Bitbake-setup download cache (DL_DIR) set to\n    {}\n'.format(settings['default']['dl-dir']))
-        print('A new settings file will be created in\n    {}\n'.format(settings_path))
-        print('A common site.conf file will be created, please edit or replace before running builds\n    {}\n'.format(siteconfpath))
-        if not non_interactive:
-            y_or_n = input('Bitbake-setup will be configured with the above settings in {}, (y/N): '.format(top_dir))
-            if y_or_n != 'y':
-                print("\nYou can run 'bitbake-setup install-settings' to edit them before setting up builds")
-                exit()
-            print()
+    siteconfpath = os.path.join(top_dir, 'site.conf')
+    print('Configuration registry set to\n    {}\n'.format(settings['default']['registry']))
+    print('Bitbake-setup download cache (DL_DIR) set to\n    {}\n'.format(settings['default']['dl-dir']))
+    print('A new settings file will be created in\n    {}\n'.format(settings_path))
+    print('A common site.conf file will be created, please edit or replace before running builds\n    {}\n'.format(siteconfpath))
+    if not non_interactive:
+        y_or_n = input('Bitbake-setup will be configured with the above settings in {}, (y/N): '.format(top_dir))
+        if y_or_n != 'y':
+            print("\nYou can run 'bitbake-setup install-settings' to edit them before setting up builds")
+            exit()
+        print()
 
-        if os.path.exists(settings_path):
-            backup_conf = settings_path + "-backup.{}".format(time.strftime("%Y%m%d%H%M%S"))
-            os.rename(settings_path, backup_conf)
-            print("Previous settings are in {}".format(backup_conf))
-        with open(settings_path, 'w') as settingsfile:
-            settings.write(settingsfile)
+    if os.path.exists(settings_path):
+        backup_conf = settings_path + "-backup.{}".format(time.strftime("%Y%m%d%H%M%S"))
+        os.rename(settings_path, backup_conf)
+        print("Previous settings are in {}".format(backup_conf))
+    with open(settings_path, 'w') as settingsfile:
+        settings.write(settingsfile)
 
-        if os.path.exists(siteconfpath):
-            backup_siteconf = siteconfpath + "-backup.{}".format(time.strftime("%Y%m%d%H%M%S"))
-            os.rename(siteconfpath, backup_siteconf)
-            print("Previous settings are in {}".format(backup_siteconf))
-        with open(siteconfpath, 'w') as siteconffile:
-            siteconffile.write('# This file is intended for build host-specific bitbake settings\n')
+    if os.path.exists(siteconfpath):
+        backup_siteconf = siteconfpath + "-backup.{}".format(time.strftime("%Y%m%d%H%M%S"))
+        os.rename(siteconfpath, backup_siteconf)
+        print("Previous settings are in {}".format(backup_siteconf))
+    with open(siteconfpath, 'w') as siteconffile:
+        siteconffile.write('# This file is intended for build host-specific bitbake settings\n')
 
 def load_settings(top_dir, non_interactive):
-    # This creates a new settings file if it does not yet exist
-    write_settings(top_dir, force_replace=False, non_interactive=non_interactive)
-
     settings_path = default_settings_path(top_dir)
+    if not os.path.exists(settings_path):
+        create_settings(top_dir, non_interactive=non_interactive)
+
     settings = configparser.ConfigParser()
     print('Loading settings from\n    {}\n'.format(settings_path))
     settings.read_file(open(settings_path))
@@ -801,7 +800,7 @@ def main():
 
     parser_install_settings = subparsers.add_parser('install-settings', help='Write a settings file with default values into the top level directory (contains the location of build configuration registry, downloads directory and other settings specific to a top directory)')
     add_top_dir_arg(parser_install_settings)
-    parser_install_settings.set_defaults(func=write_settings)
+    parser_install_settings.set_defaults(func=create_settings)
 
     parser_install_global_settings = subparsers.add_parser('install-global-settings', help='Write a global settings file with default values (contains the default prefix and name of the top directory)')
     parser_install_global_settings.set_defaults(func=write_global_settings)
@@ -853,8 +852,8 @@ def main():
         args.top_dir = get_top_dir(args, global_settings)
 
         print('Bitbake-setup is using {} as top directory (can be changed with --top-dir-prefix/name arguments or by setting them in {}).\n'.format(args.top_dir, global_settings_path(args)))
-        if args.func == write_settings:
-            write_settings(args.top_dir, force_replace=True)
+        if args.func == create_settings:
+            create_settings(args.top_dir)
         elif args.func == change_settings:
             change_settings(args.top_dir, {args.section:{args.key:args.value}})
         else:
