@@ -759,6 +759,10 @@ def main():
         else:
             parser.add_argument('--build-dir', required=True, help="Path to the build")
 
+    def add_setting_arg(parser):
+        parser.add_argument('--setting', nargs=3, action='append',
+                            help="a setting: <section> <key> <value>, for the settings file in the top level directory.")
+
     parser = argparse.ArgumentParser(
         description="BitBake setup utility. Run with 'init' argument to get started.",
         epilog="Use %(prog)s <subcommand> --help to get help on a specific command"
@@ -773,12 +777,14 @@ def main():
 
     parser_list = subparsers.add_parser('list', help='List available configurations')
     add_top_dir_arg(parser_list)
+    add_setting_arg(parser_init)
     parser_list.add_argument('--with-expired', action='store_true', help='List also configurations that are no longer supported due to reaching their end-of-life dates.')
     parser_list.add_argument('--write-json', action='store', help='Write available configurations into a json file so they can be programmatically processed.')
     parser_list.set_defaults(func=list_configs)
 
     parser_init = subparsers.add_parser('init', help='Select a configuration and initialize a build from it')
     add_top_dir_arg(parser_init)
+    add_setting_arg(parser_init)
     parser_init.add_argument('config', nargs='*', help="path/URL/id to a configuration file (use 'list' command to get available ids), followed by configuration options. Bitbake-setup will ask to choose from available choices if command line doesn't completely specify them.")
     parser_init.add_argument('--non-interactive', action='store_true', help='Do not ask to interactively choose from available options; if bitbake-setup cannot make a decision it will stop with a failure.')
     parser_init.add_argument('--source-overrides', action='store', help='Override sources information (repositories/revisions) with values from a local json file.')
@@ -853,6 +859,11 @@ def main():
         args.top_dir = get_top_dir(args, global_settings)
 
         print('Bitbake-setup is using {} as top directory (can be changed with --top-dir-prefix/name arguments or by setting them in {}).\n'.format(args.top_dir, global_settings_path(args)))
+
+        if args.setting:
+            for section, key, value in args.setting:
+                change_settings(args.top_dir, {section:{key:value}})
+
         if args.func == write_settings:
             write_settings(args.top_dir, force_replace=True)
         elif args.func == change_settings:
