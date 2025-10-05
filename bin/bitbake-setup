@@ -630,6 +630,10 @@ def create_settings(top_dir, non_interactive=True):
             print("\nYou can run 'bitbake-setup install-settings' to edit them before setting up builds")
             exit()
         print()
+    save_settings(top_dir, settings)
+
+def save_settings(top_dir, settings):
+    settings_path = default_settings_path(top_dir)
 
     if os.path.exists(settings_path):
         backup_conf = settings_path + "-backup.{}".format(time.strftime("%Y%m%d%H%M%S"))
