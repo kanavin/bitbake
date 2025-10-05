@@ -638,6 +638,16 @@ def create_settings(top_dir, non_interactive=True):
     with open(settings_path, 'w') as settingsfile:
         settings.write(settingsfile)
 
+def load_settings(top_dir, non_interactive):
+    settings_path = default_settings_path(top_dir)
+    if not os.path.exists(settings_path):
+        create_settings(top_dir, non_interactive=non_interactive)
+
+    settings = configparser.ConfigParser()
+    print('Loading settings from\n    {}\n'.format(settings_path))
+    settings.read_file(open(settings_path))
+    return settings
+
 def create_siteconf(top_dir, non_interactive=True):
     siteconfpath = os.path.join(top_dir, 'site.conf')
     print('A common site.conf file has been created, please edit or replace before running builds\n    {}\n'.format(siteconfpath))
@@ -648,16 +658,6 @@ def create_siteconf(top_dir, non_interactive=True):
         print("Previous settings are in {}".format(backup_siteconf))
     with open(siteconfpath, 'w') as siteconffile:
         siteconffile.write('# This file is intended for build host-specific bitbake settings\n')
-
-def load_settings(top_dir, non_interactive):
-    settings_path = default_settings_path(top_dir)
-    if not os.path.exists(settings_path):
-        create_settings(top_dir, non_interactive=non_interactive)
-
-    settings = configparser.ConfigParser()
-    print('Loading settings from\n    {}\n'.format(settings_path))
-    settings.read_file(open(settings_path))
-    return settings
 
 def global_settings_path(args):
     return os.path.abspath(args.global_settings) if args.global_settings else os.path.join(os.path.expanduser('~'), '.config', 'bitbake-setup', 'config')
