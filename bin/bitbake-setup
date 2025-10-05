@@ -621,11 +621,9 @@ def create_settings(top_dir, non_interactive=True):
                         }
     os.makedirs(os.path.dirname(settings_path), exist_ok=True)
 
-    siteconfpath = os.path.join(top_dir, 'site.conf')
     print('Configuration registry set to\n    {}\n'.format(settings['default']['registry']))
     print('Bitbake-setup download cache (DL_DIR) set to\n    {}\n'.format(settings['default']['dl-dir']))
     print('A new settings file will be created in\n    {}\n'.format(settings_path))
-    print('A common site.conf file will be created, please edit or replace before running builds\n    {}\n'.format(siteconfpath))
     if not non_interactive:
         y_or_n = input('Bitbake-setup will be configured with the above settings in {}, (y/N): '.format(top_dir))
         if y_or_n != 'y':
@@ -639,6 +637,10 @@ def create_settings(top_dir, non_interactive=True):
         print("Previous settings are in {}".format(backup_conf))
     with open(settings_path, 'w') as settingsfile:
         settings.write(settingsfile)
+
+def create_siteconf(top_dir, non_interactive=True):
+    siteconfpath = os.path.join(top_dir, 'site.conf')
+    print('A common site.conf file has been created, please edit or replace before running builds\n    {}\n'.format(siteconfpath))
 
     if os.path.exists(siteconfpath):
         backup_siteconf = siteconfpath + "-backup.{}".format(time.strftime("%Y%m%d%H%M%S"))
@@ -854,6 +856,7 @@ def main():
         print('Bitbake-setup is using {} as top directory (can be changed with --top-dir-prefix/name arguments or by setting them in {}).\n'.format(args.top_dir, global_settings_path(args)))
         if args.func == create_settings:
             create_settings(args.top_dir)
+            create_siteconf(args.top_dir)
         elif args.func == change_settings:
             change_settings(args.top_dir, {args.section:{args.key:args.value}})
         else:
